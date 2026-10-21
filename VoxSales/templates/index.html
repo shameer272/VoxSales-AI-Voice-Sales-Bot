@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoxSales — AI Voice Sales Agent</title>
+  <meta name="description" content="Production-ready real-time AI voice sales agent for SaaS products with speech recognition, dynamic objection handling, call recording, and automated sales qualification.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <main class="app-container">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="brand-section">
+        <div class="brand-icon">V</div>
+        <div>
+          <div class="brand-title">
+            VoxSales
+            <span class="brand-badge">SaaS Voice AI</span>
+          </div>
+          <div class="brand-subtitle">
+            AI-Powered Voice Sales Agent
+          </div>
+        </div>
+      </div>
+
+      <div class="header-status-group">
+        <span class="status-pill" id="aiConnectionPill">
+          <span class="pulse-dot"></span>Connecting to AI…
+        </span>
+        <span class="status-pill" id="speechSupportPill">
+          <span class="pulse-dot cyan"></span>Web Speech Enabled
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Left Column: Live Call Console -->
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Live Sales Call Console</h2>
+            <div class="card-subtitle">AI conducts real-time voice calls, explains value, handles objections, and closes leads</div>
+          </div>
+          <div class="card-header-actions" style="display: flex; gap: 8px; align-items: center;">
+            <span class="active-lang-pill" id="activeLangPill" title="Active Call Language">🌐 No Language</span>
+            <span class="call-status-pill" id="callStatusPill">READY</span>
+          </div>
+        </div>
+
+        <!-- Call Setup Form -->
+        <div class="call-config-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="prospectName">Prospect Name</label>
+                <span class="field-error" id="prospectNameError"></span>
+              </div>
+              <input type="text" id="prospectName" class="form-input" placeholder="Enter prospect name">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="prospectCompany">Company (Optional)</label>
+              </div>
+              <input type="text" id="prospectCompany" class="form-input" placeholder="Enter company name (optional)">
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="saasProductSelect">
+                  SaaS Product
+                  <button type="button" class="link-btn" id="viewSpecsBtn">View Specs</button>
+                </label>
+                <span class="field-error" id="saasProductSelectError"></span>
+              </div>
+              <select id="saasProductSelect" class="form-select">
+                <option value="" disabled selected>Select a SaaS product</option>
+                <option value="FlowPilot">FlowPilot — Workflow Automation</option>
+                <option value="CloudShield">CloudShield — Cloud Security Posture</option>
+                <option value="DataPulse">DataPulse — Revenue Intelligence</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <div class="form-label-row">
+                <label class="form-label" for="callLanguage">Call Language</label>
+                <span class="field-error" id="callLanguageError"></span>
+              </div>
+              <select id="callLanguage" class="form-select">
+                <option value="" disabled selected>Select a language</option>
+                <option value="en-US">English (US)</option>
+                <option value="en-IN">English (India)</option>
+                <option value="hi-IN">Hindi (हिंदी)</option>
+                <option value="te-IN">Telugu (తెలుగు)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 12px;">
+            <div class="form-label-row">
+              <label class="form-label" for="prospectNotes">Pre-Call Context & Notes (Optional)</label>
+            </div>
+            <input type="text" id="prospectNotes" class="form-input" placeholder="Enter customer needs, pain points, or sales notes (optional)">
+          </div>
+        </div>
+
+        <!-- Recording Consent Banner -->
+        <div class="consent-box" id="consentBox">
+          <input type="checkbox" id="recordingConsentCheck" class="consent-checkbox">
+          <label for="recordingConsentCheck" class="consent-text">
+            <strong>Mandatory Recording Consent:</strong> I confirm that the customer has been clearly notified and has granted affirmative consent to have this sales conversation audio-recorded for training, quality assurance, and automated transcript analysis.
+          </label>
+        </div>
+        <div class="consent-error-row" style="padding: 4px 24px 0 24px;">
+          <span class="field-error" id="recordingConsentError"></span>
+        </div>
+
+        <!-- Live Conversation Transcript -->
+        <div class="conversation-box" id="conversationBox">
+          <div class="empty-state" id="emptyStatePlaceholder">
+            <div class="empty-icon">🎙</div>
+            <h3 style="font-size: 15px; margin-bottom: 6px; color: #e2e8f0;">Voice Session Inactive</h3>
+            <p style="font-size: 12.5px;">Click <strong>Start Call</strong> to initiate the AI voice agent. The AI will introduce the product, discover requirements, and speak dynamically.</p>
+          </div>
+        </div>
+
+        <!-- Voice Wave State Banner -->
+        <div class="voice-state-banner" id="voiceStateBanner">
+          <div class="voice-wave" id="voiceWave">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+          <span id="voiceStateText">Agent idle. Ready to place call.</span>
+        </div>
+
+        <!-- Fallback Text Input (Ensures 100% accessibility if mic is disabled/unsupported) -->
+        <div class="text-fallback-box">
+          <input type="text" id="textFallbackInput" class="fallback-input" placeholder="Type customer message here (or speak into your microphone)…" disabled>
+          <button type="button" id="fallbackSendBtn" class="btn btn-secondary btn-sm" disabled>Send</button>
+        </div>
+
+        <!-- Controls Footer -->
+        <div class="call-controls">
+          <div class="timer-section">
+            <span class="call-timer" id="callDuration">00:00</span>
+            <span style="font-size: 12px; color: var(--text-dim);">DURATION</span>
+          </div>
+
+          <div class="call-buttons">
+            <button type="button" class="btn btn-mute" id="muteBtn" disabled>
+              🎤 Mute
+            </button>
+            <button type="button" class="btn btn-secondary" id="newCallBtn" style="display: none;">
+              ＋ New Call
+            </button>
+            <button type="button" class="btn btn-start" id="startCallBtn">
+              ▶ Start Call
+            </button>
+            <button type="button" class="btn btn-end" id="endCallBtn" disabled>
+              ■ End Call
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Column: Call Intelligence & History -->
+      <div class="right-column">
+
+        <!-- Call Intelligence Card -->
+        <section class="card" id="callIntelligenceCard">
+          <div class="card-header">
+            <div>
+              <h2>Call Intelligence</h2>
+              <div class="card-subtitle">AI-generated qualification, objection extraction & next steps</div>
+            </div>
+            <span class="status-badge awaiting-call" id="intelSalesStatusBadge">AWAITING CALL</span>
+          </div>
+
+          <!-- Loading Indicator State -->
+          <div class="intel-loading-banner" id="intelLoadingBanner" style="display: none;">
+            <div class="intel-spinner"></div>
+            <div class="intel-loading-text">
+              <strong>Analyzing conversation and generating sales insights…</strong>
+              <span class="intel-loading-sub">Extracting requirements, objections handled, and buying signals</span>
+            </div>
+          </div>
+
+          <!-- Analysis Failed Error State -->
+          <div class="intel-error-card" id="intelErrorCard" style="display: none;">
+            <div class="intel-error-header">
+              <span class="intel-error-icon">⚠️</span>
+              <div class="intel-error-body">
+                <strong>Analysis Failed</strong>
+                <p id="intelErrorMessage">An error occurred while communicating with the AI service. Your transcript and call recording have been safely preserved.</p>
+              </div>
+            </div>
+            <div class="intel-error-actions">
+              <button type="button" class="btn btn-secondary btn-sm" id="retryAnalysisBtn">
+                ↻ Retry Analysis
+              </button>
+            </div>
+          </div>
+
+          <!-- Local Fallback Banner (Gemini Quota or Key Unavailable) -->
+          <div class="intel-fallback-banner" id="intelFallbackBanner" style="display: none;">
+            <div class="fallback-banner-header">
+              <span class="fallback-icon">⚡</span>
+              <div class="fallback-body">
+                <div class="fallback-title-row">
+                  <strong id="fallbackBannerTitle">Local Fallback Analysis (Gemini Quota or Key Unavailable)</strong>
+                  <span class="fallback-disclaimer-pill">Not AI-Generated</span>
+                </div>
+                <p id="fallbackBannerNotice">Gemini API is unavailable or quota was reached. Sales intelligence was generated locally from saved transcript using rule-based analysis. You can Retry AI Analysis once Gemini service becomes available.</p>
+              </div>
+            </div>
+            <div class="fallback-banner-actions">
+              <button type="button" class="btn btn-secondary btn-sm" id="retryFallbackAnalysisBtn">
+                ↻ Retry AI Analysis
+              </button>
+            </div>
+          </div>
+
+          <div class="intel-body" id="intelBody">
+            <div class="intel-section">
+              <span class="intel-title">Executive Summary</span>
+              <div class="intel-text" id="intelSummaryText">Complete a sales call to generate insights.</div>
+            </div>
+
+            <div class="intel-section">
+              <span class="intel-title">Customer Requirements & Pain Points</span>
+              <div class="intel-text" id="intelRequirementsText">
+                <span class="intel-placeholder">No customer requirements recorded yet.</span>
+              </div>
+            </div>
+
+            <div class="intel-section">
+              <span class="intel-title">Questions & Objections Handled</span>
+              <div class="intel-text" id="intelObjectionsText">
+                <span class="intel-placeholder">No questions or objections recorded yet.</span>
+              </div>
+            </div>
+
+            <div class="intel-section">
+              <span class="intel-title">Buying Signals</span>
+              <div class="intel-text" id="intelSignalsText">
+                <span class="intel-placeholder">No buying signals recorded yet.</span>
+              </div>
+            </div>
+
+            <div class="intel-section">
+              <span class="intel-title">Recommended Next Action</span>
+              <div class="intel-text" id="intelNextStepsText">
+                <span class="intel-placeholder">No next action recommended yet.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audio Recording Card -->
+          <div class="audio-card" id="audioPlayerCard" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="intel-title" style="color: var(--mint);">Call Audio Recording</span>
+              <span style="font-size: 11px; color: var(--text-dim);">Recorded with Affirmative Consent</span>
+            </div>
+            <audio id="callAudioPlayer" controls></audio>
+          </div>
+        </section>
+
+        <!-- Call History Card -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h2>Call History</h2>
+              <div class="card-subtitle">Persistent SQLite records with audio playback & audit trail</div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Bar -->
+          <div class="history-controls">
+            <input type="text" id="historySearchInput" class="history-search" placeholder="Search prospect, company, product…">
+            <select id="historyStatusFilter" class="history-filter">
+              <option value="">All Statuses</option>
+              <option value="Converted">Converted</option>
+              <option value="Interested">Interested</option>
+              <option value="Demo Requested">Demo Requested</option>
+              <option value="Follow-up Required">Follow-up Required</option>
+              <option value="Not Interested">Not Interested</option>
+              <option value="No Response">No Response</option>
+            </select>
+          </div>
+
+          <!-- Bulk Actions Toolbar -->
+          <div class="history-bulk-bar" id="historyBulkBar">
+            <label class="history-select-all-label" for="selectAllCalls">
+              <input type="checkbox" id="selectAllCalls" class="call-checkbox" aria-label="Select all calls">
+              <span>Select All</span>
+            </label>
+            <div class="history-bulk-actions">
+              <span class="selection-count-badge" id="selectedCallsCount">0 selected</span>
+              <button type="button" class="btn btn-danger btn-sm" id="deleteSelectedBtn" disabled>
+                🗑 Delete Selected (<span id="deleteSelectedCount">0</span>)
+              </button>
+            </div>
+          </div>
+
+          <!-- History List -->
+          <div class="history-list" id="historyList">
+            <div class="empty-state" style="padding: 24px;">Loading saved calls…</div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Product Specifications Modal -->
+    <div class="modal-overlay" id="productModalOverlay">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div>
+            <h3 id="modalProductName" style="font-size: 17px; font-weight: 700;">Product Specs</h3>
+            <div id="modalTagline" style="font-size: 12px; color: var(--cyan); margin-top: 2px;"></div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" id="closeModalBtn">Close</button>
+        </div>
+        <div class="modal-body">
+          <div class="intel-section">
+            <span class="intel-title">Description</span>
+            <p id="modalDescription" style="font-size: 13px; color: #cbd5e1;"></p>
+          </div>
+          <div class="intel-section">
+            <span class="intel-title">Key Capabilities & Features</span>
+            <ul id="modalFeaturesList" style="font-size: 13px; color: #cbd5e1; padding-left: 20px;"></ul>
+          </div>
+          <div class="intel-section">
+            <span class="intel-title">Official Pricing Schedule</span>
+            <div id="modalPricing" class="intel-text"></div>
+          </div>
+          <div class="intel-section">
+            <span class="intel-title">Target Audience</span>
+            <div id="modalAudience" class="intel-text"></div>
+          </div>
+          <div class="intel-section">
+            <span class="intel-title">Verified Limitations</span>
+            <div id="modalLimitations" class="intel-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div class="toast-msg" id="toast"></div>
+
+    <footer class="app-footer">
+      VoxSales AI Voice Sales Agent • Built with Flask, SQLite, Google Gemini API, Web Speech & MediaRecorder • Production-Ready
+    </footer>
+
+  </main>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

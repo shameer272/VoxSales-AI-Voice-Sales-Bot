@@ -1,0 +1,8 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+VoxSales/salesbot.db
+VoxSales/recordings/*
+!VoxSales/recordings/.gitkeep

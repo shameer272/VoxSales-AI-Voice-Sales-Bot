@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: voxsales-ai-voice-sales-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: PORT
+        value: 10000
+    # Note: On Render free tier, the filesystem is ephemeral.
+    # For durable SQLite history and audio recordings across restarts/deploys,
+    # attach a persistent disk mounted to /recordings and DB directory.

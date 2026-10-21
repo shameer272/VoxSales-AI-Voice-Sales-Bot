@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+salesbot.db
+recordings/*
+!recordings/.gitkeep
+.venv/
